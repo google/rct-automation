@@ -1,0 +1,12 @@
+import "playableitem.proto";
+
+package automation;
+
+message PlayerState {
+  optional PlayableItem now_playing = 1;
+  optional bool paused = 2;
+  optional float time_pos = 3;
+  optional int32 length = 4;
+  optional string path = 5;
+  optional string metadata = 6;
+}

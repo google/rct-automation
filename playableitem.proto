@@ -1,0 +1,20 @@
+package automation;
+
+message PlayableItem {
+  optional int64 PlayableItemID = 1;
+  optional string filename = 2;
+  optional int64 duration = 3;
+  optional string description = 4;
+  enum Type {
+    UNKNOWN = 0;
+    LOCALFILE = 1;
+    WEBSTREAM = 2;
+  }
+  optional Type type = 5 [default = UNKNOWN];
+
+  // For webstream, size in cache to have mplayer use.  In kilobytes
+  optional int32 cache = 6 [default = 64]; 
+
+  optional int32 playcount = 7 [default = 0];
+}
+

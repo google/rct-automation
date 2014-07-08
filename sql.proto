@@ -1,0 +1,11 @@
+package automation;
+
+message SQLRow {
+    repeated string data = 1;
+}
+
+message SQLResult {
+    optional SQLRow column = 1;
+    repeated SQLRow row = 2;
+}
+

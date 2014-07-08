@@ -1,0 +1,54 @@
+import "playableitem.proto";
+import "playlist.proto";
+
+package automation;
+
+message TimeSpecification {
+  repeated int64 constrained_seconds = 1;
+  repeated int64 constrained_minutes = 2;
+  repeated int64 constrained_hours = 3;
+  repeated int64 constrained_dow = 4;
+  repeated int64 constrained_dom = 5;
+  repeated int64 only_at_times = 6;
+
+  // The number of seconds we can be late.
+  optional int64 gap = 7;
+}
+
+message PlayFilesAction {
+  repeated PlayableItem what = 1;
+}
+
+message Requirement {
+  optional TimeSpecification when = 1;
+  enum Command {
+    NO_OP = 0;
+    PLAY_FILES = 1;
+    LEGAL_ID = 2;
+    SET_MAINSHOW = 3;
+  };
+  required Command type = 2;
+  optional int64 not_before = 4;
+  optional bool reboot = 5 [default = false];
+
+  // Upon completion of this requirement, advance the internal time
+  // by this number of seconds.  If negative, upon the completion of
+  // this requirement, set the internal time to the wall-clock time.
+  // If there are multiple Requirements all happening at the same time,
+  // the max(effective internal time advance) of all of them is used.
+  // We will always advance by at least one second, to avoid endless
+  // loops, regardless of this setting.
+  optional int64 internal_time_advance = 6 [default = -1];
+
+  // For PLAY_FILES - a Playlist to play.  Note we play items, not playableItemIDs
+  optional Playlist playlist = 7;
+
+  // For SET_MAINSHOW - a playlistname to play. If not set or not found,
+  // we will use the default logic for mainshow selection.
+  optional string target_playlistname = 8;
+}
+
+
+message Schedule {
+  repeated Requirement schedule = 1;
+}

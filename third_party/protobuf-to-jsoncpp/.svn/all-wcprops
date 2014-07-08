@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 22
+/svn/!svn/ver/11/trunk
+END
+json_protobuf.h
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/11/trunk/json_protobuf.h
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/4/trunk/LICENSE
+END
+check_protobuf_types.proto
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/2/trunk/check_protobuf_types.proto
+END
+AUTHORS
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/3/trunk/AUTHORS
+END
+check_json_protobuf.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/6/trunk/check_json_protobuf.cpp
+END
+json_protobuf.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/6/trunk/json_protobuf.cpp
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 28
+/svn/!svn/ver/5/trunk/README
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 30
+/svn/!svn/ver/2/trunk/Makefile
+END

@@ -1,0 +1,6 @@
+[submodule "gflags"]
+	path = gflags
+	url = https://github.com/spurious/gflags-mirror.git
+[submodule "glog"]
+	path = glog
+	url = git://anonscm.debian.org/collab-maint/google-glog.git

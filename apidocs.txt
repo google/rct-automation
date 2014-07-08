@@ -1,0 +1,133 @@
+The 'format' URL parameter can be any of 'pb', 'debugpb', or 'json' for fetching data,
+and when POSTing data, can be any of 'pb' or 'json'
+
+URL endpoints:
+
+  /override/enable
+    URL params: none
+    Effect: Unconditionally put automation into "manual override" mode, from which it will only
+    select tracks from the special "override" playlist. 
+
+  /override/disable
+    URL params: none
+    Effect: Unconditionally turn off "manual override" mode. Also has the side effect of 
+    returning the player to the normal state (e.g. unpausing, returning speed to 1.0)
+    Note this does not clear the "override" playlist.
+
+  /playlist/fetch
+    URL params: 
+     One of:
+      fetchall:  Returns an automation::Playlist object with all PlayableItems in the database
+      mainshow:  Returns an automation::Playlist object representing the "mainshow" playlist. 
+                 The "mainshow" playlist is the playlist that is drawn on for passing time before
+                 the next scheduled requirement when not in override mode.
+      override:  Returns an automation::Playlist object representing the "override" playlist. This
+                 has priority over the "mainshow" playlist when not in override mode, and is
+                 the highest priority playlist while in override mode.
+      bumperlist: Returns an automation::Playlist object representing the "bumperlist" playlist.
+                  This is a special playlist that is drawn on when not in override mode iff
+                  there are no items that will fit in the needed time in the mainshow or override
+                  playlist, and the time left is less than FLAGS_bumpercutoff (if greater, a new
+                  mainshow is selected).
+      id=N: If present, should contain a value that is an integer that maps to a PlaylistID.
+          Returns said playlist.
+
+    Plus any of:
+      format
+      filter=RE: Contain a value, RE, which is interpreted as a regular expression, which is used
+              as a re2 regular expression as a partial match on both the 'filename'
+              and 'description' fields of each PlayableItem.  If this is specified, by default the
+              output automation::Playlist will contain the repeated PlayableItems.
+              If it is not specified, it will return an array of PlayableItemIDs. re2
+              is cheap, so feel free to do filter=. to fetch PlayableItems instead of
+              just their IDs.
+      noitems: If set, modifies the behavior of filter (see above) to return the array
+               of PlayableItemIDs instead of the array of PlayableItems.  If filter
+               is not set, has no effect.
+      limit=N: [expert] We perform a SQL query internally to fetch PlayableItems that we
+               then optionally apply a filter to.  This limits the number of items
+               returned to the given integer value.  Default is INT64_MAX.
+      offset=N: [expert] Like 'limit' but with the offset clause, that is, the first N
+                records are skipped.
+      truncate=N: [expert] Post-filter truncation of the result set down to N records.
+                  Note we have to compute the entire set in memory before truncating
+                  down, so if there's a real pathological performance case here this
+                  may not help, unless the bandwidth to the client is the limiting factor.
+      alsosave: If set, saves a copy of the current result set to a new playlist, and returns
+                the playlist.  Note setting this also implies 'noitems' - see above. It
+                is an error to call this on any playlist who has had values played (e.g.
+                don't use this with mainshow/bumperlist/override, but it should work
+                fine with fetchall or filtering on an existing list)
+
+  /playlist/all
+    URL params: none
+    Returns an automation::Playlists containing metadata about all persisted playlists.
+    Note this does not include the special playlists: mainshow, override, or bumperlist.  
+    recent PlayableItemID that was sent to it.
+
+  /playlist/update
+    URL params:
+      - format
+      - Any of the selectors for 'fetch' above, except 'fetchall' - that is,
+        any of mainshow, override, bumperlist, or id=N.
+    POST body: automation::PlaylistMergeRequest, serialized using the 'format' option provided,
+    to be applied to the request. Note the application is a merge and then SQL REPLACE, so 
+    if the ID already exists it will rename.  There is also a unique index on name, so this
+    can be used (perhaps strangely) to delete a database as well.
+    
+  /player/state
+    URL params: none
+    Returns an automation::PlayerState about the current state of mplayer, including the PlayableItem
+    that it is currently playing.
+
+  /player/pause
+    URL params: none
+    Pauses the player if it is currently playing, resumes it otherwise. No action if not in override
+    mode.
+
+  /player/stop
+    URL params: none
+    Stops playing the current song.  Control flow will continue as if the current track finished.
+
+  /player/speed
+    URL params: speed
+    Adjusts mplayer playback speed.  'speed' is a float, e.g. 1.0 is normal playback speed, and 1.05
+    is 5% faster.
+
+  /player/seek
+    URL params: seek
+    Instructs mplayer to jump to the provided time (mplayer calls this a time_pos).  Note this seek
+    sometimes causes mplayer to make screeching noises.
+
+  /requirements/fetch
+    URL params:
+      - format
+    Returns the automation::Schedule that corresponds with all of our scheduled requirements.
+
+  /requirements/update
+    POST body - automation::Schedule of provided format
+    URL params:
+      - format
+    Replaces the existing automation::Schedule with the one that is provided.
+
+  /requirements/runonce
+    POST body - automation::Schedule of provided format
+    URL params:
+      - format
+    Runs every item in the provided schedule (ignoring time constraints, and not affecting internal time)
+    immediately.  Note the mplayer session will belong to this thread - that is, it coulld easily
+    overlap in time another mplayer.
+
+  /sql
+    POST body: SQL query to run (raw plaintext)
+    URL params: format
+    Runs an arbitrary SQLite3 statement (or statements) against our internal database, retutns the result set.
+    Arguably this could be used solely for maintenance of all things DB (creating playlists,
+    updating playlists, etc.) except the special lists (mainshow, override, etc.) do not exist
+    in the DB and therefore aren't exposed here.
+    This endpoint can be disabled by setting the command line flag --expose_sql to false.
+    If the queries begin a transaction and an error occurs, it will be rolled back immediately.
+    Example SQL queries:
+      SELECT * from Playlist;
+      SELECT * from PlayableItem;
+      DELETE FROM Playlist WHERE PlaylistID=28;

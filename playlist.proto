@@ -1,0 +1,41 @@
+import "playableitem.proto";
+
+package automation;
+
+message Playlist {
+  // For update requests: the playlist to update.  In data responses:
+  // the item this describes.
+  optional int64 PlaylistID = 1;
+
+  // The name of the playlist.
+  optional string name = 2;
+
+  // The weight of the playlist for the selection of mainshow.  We randomly
+  // select a playlist (when one is needed) using a function that guarantees
+  // each item will be picked with probability {weight}/{sum of all weights}
+  optional int64 weight = 3;
+
+  repeated int64 PlayableItemID = 4;
+  repeated PlayableItem items = 5;  
+
+  optional int64 length = 6;
+}
+
+// a subset of Playlist (ensure field numbers match!) that can be
+// sent on the wire as a merge request.
+message PlaylistMergeRequest {
+  required int64 PlaylistID = 1;
+  optional string name = 2;
+  optional int64 weight = 3;
+  repeated int64 PlayableItemID = 4;
+}
+
+message Playlists {
+  repeated Playlist item = 1;
+}
+
+// We 'lock' certain playlists to require the existence of a playlist
+// with their name.
+message PlaylistLock {
+  optional string name = 1;
+}

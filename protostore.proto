@@ -1,0 +1,7 @@
+package automation;
+
+message ProtoTable {
+  optional int64 ProtoStoreID = 1;
+  optional string label = 2;
+  optional bytes data = 3;
+}

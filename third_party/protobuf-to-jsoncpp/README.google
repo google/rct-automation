@@ -1,0 +1,10 @@
+URL: https://code.google.com/p/protobuf-to-jsoncpp/
+Version: r11
+License: 2-clause BSD
+License File: LICENSE
+
+Description:
+A library for converting between protobufs and json.
+
+Local Modifications:
+Small fixes to improve portability across versions of libprotobuf.
